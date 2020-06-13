@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head> </head>
+  <body>
+    <div>
+      <h1>
+        Login Form
+      </h1>
+
+      Username :<input id="username" type="text" name="username" /> Password
+      :<input id="password" type="password" />
+      <button onclick="login()">Login</button>
+    </div>
+
+    <script>
+      var userBase = [];
+
+      function login() {
+        var url = "http://localhost:3000/todo/login";
+        fetch(url, {
+          method: "POST",
+          body: JSON.stringify({
+            username: document.getElementById("username").value,
+            password: document.getElementById("password").value,
+          }),
+          headers: {
+            "Content-type": "application/json; chatset=UTF-8",
+          },
+        })
+          .then((res) => {
+            var p = res.json(); // Fetch the Json Form APIs
+            console.log("Success");
+            if (res.status == 200) {
+              console.log("Success hit");
+              window.location.href = "index.html";
+            } else {
+              console.log("Login Error Try Again");
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+    </script>
+  </body>
+</html>

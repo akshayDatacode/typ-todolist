@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      My Todo List
+    </title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body id="todo-body">
+    <div id="todolistSection" class="todolistSection">
+      <div id="todo-form" class="todo-form">
+        <form id="todolistFormAddTask" class="new-item-form">
+          <h2>Creat New Task</h2>
+          <input id="taskTitleInput" type="text" placeholder="Task Title" />
+          <input
+            id="taskDescriptionInput"
+            type="text"
+            placeholder="Task Description"
+          />
+          <input
+            id="taskDeadlineInput"
+            type="text"
+            placeholder="Task DeadLine"
+          />
+        </form>
+        <button class="add-button" onclick="addTask()">Add Task</button>
+
+        <h6 id="taskAddedResponce"></h6>
+      </div>
+      <div class="todo-list">
+        <h1>My Todo List</h1>
+
+        <button
+          class="filter-btn"
+          onclick="pendingTasks()"
+          placeholder="Task DeadLine"
+        >
+          Show Pending Tasks
+        </button>
+
+        <div id="todolistElement"></div>
+      </div>
+    </div>
+
+    <script>
+      // javascript object OR JSON
+      //array of Objects
+      var todoItems = [];
+
+      //referring HTML Elements
+      var todolistElement = document.getElementById("todolistElement");
+      var taskAddedResponce = document.getElementById("taskAddedResponce");
+      var taskTitleINputElement = document.getElementById("taskTitleInput");
+
+      var taskDescriptionInputElement = document.getElementById(
+        "taskDescriptionInput"
+      );
+      var taskDeadlineInputElement = document.getElementById(
+        "taskDeadlineInput"
+      );
+
+      // Showing of TODO LIST
+      var urllist = "http://localhost:3000/todo/list";
+      var promiseofresponse = fetch(urllist);
+      promiseofresponse.then((response) => {
+        if (response.status == 200) {
+          var promiseofdata = response.json();
+          promiseofdata.then((jsondata) => {
+            todoItems = jsondata;
+            renderTodoItems();
+          });
+        }
+      });
+      renderTodoItems = () => {
+        var textHtml = "";
+        // loop
+        for (var i = 0; i < todoItems.length; i++) {
+          textHtml += `<div class="todo-item">
+                             <div class="task-title">${todoItems[i].taskTitle}</div>
+                      <div class="task-description">${todoItems[i].taskDescription}</div>
+                      <div class="task-description">Status :  ${todoItems[i].isCompleted}</div>
+      <div class="task-deadline">${todoItems[i].taskDeadline}</div>
+      <a href="#" class="delete-btn" onclick="deleteTask(${i})">Delete</a>
+      <a href="#" class="edit-btn" onclick="editTask(${i})">Edit</a>
+      </div>
+      `;
+        }
+        todolistElement.innerHTML = textHtml;
+      };
+      // Create the TODO LIST
+
+      function addTask() {
+        var taskTitle = taskTitleINputElement.value;
+        var taskDescription = taskDescriptionInputElement.value;
+        var taskDeadline = taskDeadlineInputElement.value;
+
+        var url = "http://localhost:3000/todo/create";
+        fetch(url, {
+          method: "POST",
+          body: JSON.stringify({
+            taskTitle: taskTitle,
+            taskDescription: taskDescription,
+            deadline: taskDeadline,
+            isCompleted: "Pending",
+          }),
+          headers: {
+            "Content-type": "application/json; chatset=UTF-8",
+          },
+        })
+          .then((res) => {
+            var p = res.json(); // Fetch the Json Form APIs
+            if (res.status == 201) {
+              console.log("Task Added");
+              taskAddedResponce.innerHTML = `<h5>Task added</h5>`;
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+
+        taskTitleINputElement.value = "";
+        taskDescriptionInputElement.value = "";
+        taskDeadlineInputElement.value = "";
+      }
+
+      // Pending tasks Function
+      pendingTasks = () => {
+        console.log("Filter Button");
+        var urllist = "http://localhost:3000/todo/filter";
+        var promiseofresponse = fetch(urllist);
+        promiseofresponse.then((response) => {
+          if (response.status == 200) {
+            var promiseofdata = response.json();
+            promiseofdata.then((jsondata) => {
+              todoItems = jsondata;
+              renderTodoItems();
+            });
+          }
+        });
+      };
+
+      // Delete Function
+
+      function deleteTask(index) {
+        console.log("Delete Button");
+        var url = "http://localhost:3000/todo/delete";
+        fetch(url, {
+          method: "POST",
+          body: JSON.stringify({
+            taskTitle: todoItems[index].taskTitle,
+            taskDescription: todoItems[index].taskDescription,
+          }),
+          headers: {
+            "Content-type": "application/json; chatset=UTF-8",
+          },
+        })
+          .then((res) => {
+            var p = res.json(); // Fetch the Json Form APIs
+            if (res.status == 201) {
+              console.log("Task Deleted");
+              taskAddedResponce.innerHTML = `<h5>Task Deleted</h5>`;
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+
+      //   Edit Function
+      function editTask(index) {
+        console.log("Edit Active");
+        for (var i = 0; i < todoItems.length; i++) {
+          console.log("Edit Active IF");
+          if (i == index) {
+            console.log("Edit Active IF");
+            taskTitleINputElement.value = `${todoItems[i].taskTitle}`;
+            taskDescriptionInputElement.value = `${todoItems[i].taskDescription}`;
+            taskDeadlineInputElement.value = `${todoItems[i].taskDeadline}`;
+            //call the update
+          }
+        }
+        deleteTask(index);
+      }
+    </script>
+  </body>
+</html>
